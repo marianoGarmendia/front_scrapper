@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Bell, BellOff } from 'lucide-react';
 
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
+
+
 interface Alert {
   id: string;
   nombreAlerta: string;
@@ -24,7 +27,7 @@ export default function AlertsList({ onAlertSelect }: AlertsListProps) {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch('https://72jdmlb6-3000.brs.devtunnels.ms/alerts/get-alerts');
+        const response = await fetch( URL_PROD + '/alerts/get-alerts');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

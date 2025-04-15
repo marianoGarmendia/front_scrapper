@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, BellOff, ChevronRight, ArrowLeft, Trash2 , X} from "lucide-react";
-const BASE_URL = import.meta.env.VITE_BASE_URL_DEV;
-console.log(BASE_URL);
+import {
+  Bell,
+  BellOff,
+  ChevronRight,
+  ArrowLeft,
+  Trash2,
+  X,
+} from "lucide-react";
+
 
 type AlertDelete = {
   message: string;
@@ -19,6 +25,7 @@ interface Alert {
   id: string;
   nombreAlerta: string;
   modelo: string;
+  minutos: string;
   hora: string;
   marca: string;
   yearDesde: string;
@@ -40,22 +47,31 @@ interface Alert {
   }>;
 }
 
-function DeleteConfirmationModal({ alertName, onConfirm, onCancel }: DeleteModalProps) {
+const URL_PROD = import.meta.env.VITE_URL_PROD;
+
+function DeleteConfirmationModal({
+  alertName,
+  onConfirm,
+  onCancel,
+}: DeleteModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-900">Confirmar Eliminación</h3>
-          <button 
+          <h3 className="text-xl font-semibold text-gray-900">
+            Confirmar Eliminación
+          </h3>
+          <button
             onClick={onCancel}
             className="text-gray-400 hover:text-gray-600"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <p className="text-gray-600 mb-6">
-          ¿Estás seguro que deseas eliminar la alerta "{alertName}"? Esta acción no se puede deshacer.
+          ¿Estás seguro que deseas eliminar la alerta "{alertName}"? Esta acción
+          no se puede deshacer.
         </p>
 
         <div className="flex justify-end gap-3">
@@ -81,15 +97,46 @@ export default function AlertsPage() {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+
+  const [newCars, setNewCars] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+  // Me traigo los autos nuevos
+
+  const fetchAlertDetails = async (id: string) => {
+    try {
+      const response = await fetch(
+        URL_PROD + `/alerts/get-alerts-cars/${id}?alertPage=${true}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Oops, the server didn't return JSON!");
+      }
+      const data = await response.json();
+      console.log("data fetchAlertDetails");
+
+      console.log(data.cars);
+
+      const cars = data.cars.cars;
+      const onlyNewCars = cars.filter((car: any) => car.nuevo === true);
+      setNewCars(onlyNewCars);
+    } catch (error) {
+      console.error("Error al obtener los detalles de la alerta:", error);
+      setError(
+        "No se pudieron cargar los detalles de la alerta. Por favor, intente más tarde."
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch(`${BASE_URL}alerts/get-alerts`);
+        const response = await fetch(`${URL_PROD}alerts/get-alerts`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -115,9 +162,15 @@ export default function AlertsPage() {
     fetchAlerts();
   }, []);
 
+  useEffect(() => {
+    console.log("selectedAlert", selectedAlert);
+    if (!selectedAlert) return;
+    fetchAlertDetails(selectedAlert?.id);
+  }, [selectedAlert]);
+
   const handleDeleteClick = (alert: Alert) => {
     console.log("handleDeleteClick", alert);
-    
+
     setAlertToDelete(alert);
     setShowDeleteModal(true);
   };
@@ -127,12 +180,11 @@ export default function AlertsPage() {
     setAlertToDelete(null);
   };
 
-
   const handleDeleteConfirm = async () => {
     if (!alertToDelete) return;
     try {
       const response = await fetch(
-        `${BASE_URL}alerts/delete-alert/${alertToDelete.id}`,
+        `${URL_PROD}alerts/delete-alert/${alertToDelete.id}`,
         {
           method: "DELETE",
           headers: {
@@ -146,15 +198,18 @@ export default function AlertsPage() {
       }
       // const alert_delete = await response.json();
       // const { alert_name } = alert_delete;
-     
-      setAlerts(prev => prev.filter(alert => alert.id !== alertToDelete.id));
+
+      setAlerts((prev) =>
+        prev.filter((alert) => alert.id !== alertToDelete.id)
+      );
       if (selectedAlert?.id === alertToDelete.id) {
-        setSelectedAlert(alerts.find(alert => alert.id !== alertToDelete.id) || null);
+        setSelectedAlert(
+          alerts.find((alert) => alert.id !== alertToDelete.id) || null
+        );
       }
       setShowDeleteModal(false);
       setAlertToDelete(null);
       // console.log(alert_name);
-      
     } catch (error) {
       console.error("Error al eliminar la alerta:", error);
       setError("No se pudo eliminar la alerta. Por favor, intente más tarde.");
@@ -213,7 +268,8 @@ export default function AlertsPage() {
                           {alert.nombreAlerta}
                         </h4>
                         <p className="text-sm text-gray-500">
-                          Alerta se ejecuta a la hora: {alert.hora}
+                          Alerta se ejecuta a la hora: {alert.hora}:
+                          {alert.minutos}
                         </p>
                         <p className="text-sm text-gray-500">
                           modelo: {alert.modelo}
@@ -299,6 +355,53 @@ export default function AlertsPage() {
                   <h3 className="text-lg font-semibold mb-4">
                     Últimos Vehículos Encontrados
                   </h3>
+
+                  {newCars.length > 0 && (
+                    <>
+                      <div className="text-sm text-gray-600  mb-4">
+                        Se encontraron {newCars.length} vehículos nuevos.
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {newCars.map((vehicle) => (
+                          <div
+                            key={vehicle.id}
+                            className="border rounded-lg overflow-hidden"
+                          >
+                            <img
+                              src={vehicle.imgSrc}
+                              alt={`${vehicle.brand} ${vehicle.model}`}
+                              className="w-full h-48 object-cover"
+                            />
+                            <div className="p-4">
+                              <h4 className="font-medium">
+                                {vehicle.brand} {vehicle.model}
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                Año: {vehicle.year}
+                              </p>
+                              <p className="text-lg font-bold text-blue-600">
+                                ${vehicle.price.toLocaleString()}
+                              </p>
+                              <a
+                                href={vehicle.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 block text-center text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                Ver Publicación
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {newCars.length === 0 && (
+                    <div className="text-sm text-gray-600 mb-4">
+                      No se encontraron vehículos nuevos.
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedAlert.vehicles &&
                       selectedAlert.vehicles.slice(0, 4).map((vehicle) => (

@@ -1,86 +1,65 @@
-// import { createContext, useContext, useState, Dispatch, SetStateAction} from 'react';
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
 
-// const CarContext = createContext<CarsContextType | undefined>(undefined);
+// Definición de la interfaz para un vehículo
+interface Vehicle {
+    id: string;
+    brand: string;
+    model: string;
+    year: number;
+    price: number;
+    imageUrl: string;
+    listingUrl: string;
+    isContacted: boolean;
+    isFavorite: boolean;
+    comment?: string;
+    contactCel: string;
+}
 
-// interface Vehicle {
-//   id: string;
-//   brand: string;
-//   description: string;
-//   model: string;
-//   year: number;
-//   price: number;
-//   imgSrc: string;
-//   link: string;
-// }
+// Definición de la interfaz para una alerta que contiene múltiples vehículos
+interface Alert {
+    alertId: string | undefined;
+    vehicles: Vehicle[];
+}
 
-// interface CarsContextType {
-  
-//     loading: boolean;
-//     setCars: Dispatch<SetStateAction<Vehicle[]>>;
-//     cars: Vehicle | null;
-//     setLoading: Dispatch<SetStateAction<boolean>>;
-//     status: { id: string; status: string } | null;
-//     setSelectedVehicles: Dispatch<SetStateAction<string[]| null>>;
-//     selectedVehicles: string[] | null;
-//     searchResults: Vehicle[] | null;
-// }
+// Definición de la interfaz para el tipo de contexto
+interface CarsContextType {
+    vehicles: Alert[];
+    setVehicles: Dispatch<SetStateAction<Alert[]>>;
+    brands: string[];
+    setBrands: Dispatch<SetStateAction<string[]>>;
+    nombreAlerta: string;
+    setNombreAlerta: Dispatch<SetStateAction<string>>;
+    filterVehicles: number;
+    setFilterVehicles: Dispatch<SetStateAction<number>>;
+}
 
+// Creación del contexto con un valor por defecto
+const CarContext = createContext<CarsContextType | undefined>(undefined);
 
+// Definición de las propiedades esperadas por el proveedor del contexto
+interface Props {
+    children: React.ReactNode;
+}
 
-// interface Props {
-//   children: React.ReactNode;
-// }
+// Implementación del proveedor del contexto
+export const CarProvider: React.FC<Props> = ({ children }) => {
+    const [vehicles, setVehicles] = useState<Alert[]>([]);
+    const [brands, setBrands] = useState<string[]>([]);
+    const [filterVehicles , setFilterVehicles] = useState<number>(0);
+    const [nombreAlerta, setNombreAlerta] = useState<string>('');
 
-// export function CarProvider({ children }:Props) {
-//     const [cars, setCars] = useState<Vehicle[]>([]);
-//     const [loading, setLoading] = useState(false);
-//     const [error, setError] = useState(null);
+    return (
+        <CarContext.Provider value={{ vehicles, setVehicles, brands, setBrands, nombreAlerta, setNombreAlerta , filterVehicles, setFilterVehicles }}>
+            {children}
+        </CarContext.Provider>
+    );
+};
 
-//     const handleSaveSelection = async ({ setSelectedVehicles, selectedVehicles, searchResults}:CarsContextType) => {
-//         try {
-//           const selectedVehiclesData = searchResults?.filter((vehicle) =>
-//             selectedVehicles?.includes(vehicle.id)
-//           );
-    
-//           console.log("selectedVehiclesData: ", selectedVehiclesData);
-          
-    
-//           await fetch("https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/save", {
-//             method: "POST",
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({
-//               vehicles: selectedVehiclesData?.map((vehicle) => ({
-//                 ...vehicle,
-//                 isContacted: false,
-//                 isFavorite: false,
-//               })),
-//             }),
-//           });
-
-//           const updateVehicles = (newVehicles: Vehicle[]) => {
-//             // setCars(); // Ahora estamos estableciendo un array de vehículos
-//           };
-//           updateVehicles(selectedVehiclesData || []); // Actualiza el estado de los vehículos con los seleccionados
-//           setSelectedVehicles([]);
-          
-//         } catch (error) {
-//           console.error("Error al guardar los vehículos seleccionados:", error);
-//         }
-//       };
-
-//     return (
-//         <CarContext.Provider value={{ cars, setCars, loading, setLoading, error, setError , handleSaveSelection}}>
-//             {children}
-//         </CarContext.Provider>
-//     );
-// }
-
-// export function useCarsContent() {
-//     const context = useContext(CarContext);
-//     if (!context) {
-//         throw new Error('useContent must be used within a ContextProvider');
-//     }
-//     return context;
-// }
+// Hook personalizado para usar el contexto
+export const useCarsContext = (): CarsContextType => {
+    const context = useContext(CarContext);
+    if (!context) {
+        throw new Error('useCarsContext debe ser utilizado dentro de un CarProvider');
+    }
+    return context;
+};

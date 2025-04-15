@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import VehicleList from '../components/VehicleList';
 
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
+
+
 interface Vehicle {
   id: string;
   brand: string;
@@ -12,7 +15,15 @@ interface Vehicle {
   price: number;
   imgSrc: string;
   link: string;
+ 
+  isFavorite: boolean;
+  comment?: string;
+  contactCel: string;
+  nuevo?: boolean;
+  isContacted: boolean;
 }
+
+
 
 interface ManagedVehicle extends Vehicle {
   isContacted: boolean;
@@ -21,7 +32,7 @@ interface ManagedVehicle extends Vehicle {
 
 export default function ManagementPage() {
   const navigate = useNavigate();
-  const [vehicles, setVehicles] = useState<ManagedVehicle[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [error, setError] = useState<string | null>(null);
     const [isContacted, setIsContacted] = useState<boolean>(false);
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -30,7 +41,7 @@ export default function ManagementPage() {
   useEffect(() => {
     const fetchManagedVehicles = async () => {
       try {
-        const response = await fetch('https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/get');
+        const response = await fetch(URL_PROD + '/management/vehicles/get');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -53,7 +64,7 @@ export default function ManagementPage() {
       const vehicle = vehicles.find(v => v.id === vehicleId);
       if (!vehicle) return;
 
-      const response = await fetch(`https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/update/${vehicleId}`, {
+      const response = await fetch(URL_PROD + `/management/vehicles/update/${vehicleId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +95,7 @@ export default function ManagementPage() {
       const vehicle = vehicles.find(v => v.id === vehicleId);
       if (!vehicle) return;
 
-      const response = await fetch(`https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/update/${vehicleId}`, {
+      const response = await fetch(URL_PROD +`/management/vehicles/update/${vehicleId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +123,7 @@ export default function ManagementPage() {
 
   const handleDelete = async (vehicleId: string) => {
     try {
-      const response = await fetch(`https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/delete/${vehicleId}`, {
+      const response = await fetch(URL_PROD +`/management/vehicles/delete/${vehicleId}`, {
         method: 'DELETE',
       });
 
@@ -164,7 +175,7 @@ export default function ManagementPage() {
           showManagementButtons={true}
           onToggleContacted={handleToggleContacted}
           onToggleFavorite={handleToggleFavorite}
-          onDelete={handleDelete}
+          onDeleted={handleDelete}
           managementData={managementData}
         />
       </div>

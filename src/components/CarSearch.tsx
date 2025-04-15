@@ -6,12 +6,20 @@ import {
   Bell,
   ListFilter,
   ClipboardList,
+  Car,
 } from "lucide-react";
+import toast, { Toaster } from 'react-hot-toast';
+
 import { useNavigate } from "react-router-dom";
 import YearRangeModal from "./YearRangeModal";
 import PriceRangeModal from "./PriceRangeModal";
+
 import AlertModal from "./AlertModal";
 import VehicleList from "./VehicleList";
+import LogoutButton from './LogoutButton';
+import * as models from "../utils/models.ts";
+
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
 
 export const carBrands = [
   { id: 1, name: "Chevrolet" },
@@ -163,18 +171,45 @@ interface Vehicle {
   price: number;
   imgSrc: string;
   link: string;
+  comments?: string;
+    contactCel: string;
 }
 
+interface VehicleList {
+  id: string;
+  description: string;
+  brand: string;
+  model: string;
+  year: number;
+  price: number;
+  imgSrc: string;
+  link: string;
+  comment?: string;
+  contactCel: string;
+  nuevo?: boolean;
+  isContacted: boolean;
+  isFavorite: boolean;
+}
+
+
 const carModels = {
-  Toyota: ["Corolla", "Camry", "RAV4", "Highlander"],
-  Honda: ["Civic", "Accord", "CR-V", "Pilot"],
-  Ford: ["Mustang", "F-150", "Explorer", "Escape", "Ranger"],
-  BMW: ["3 Series", "5 Series", "X3", "X5"],
-  "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE"],
-  Chevrolet:["Camaro", "Onix", "Equinox", "Malibu"],
-  Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe"],
-  Nissan: ["Altima", "Maxima", "Rogue", "Murano"],
-  Peugeot: ["208", "308", "3008", "5008"],
+  Toyota: models["Toyota"],
+  Honda: models["Honda"],
+  Ford: models["Ford"],
+  BMW: models["BMW"],
+  "Mercedes-Benz": models["Mercedes_Benz"],
+  Chevrolet:models["Chevrolet"],
+  Hyundai: models["Hyundai"],
+  Nissan: models["Nissan"],
+  Peugeot: models["Peugeot"],
+  Kia: models["Kia"],
+  Volkswagen: models["Volkswagen"],
+  Mazda: models["Mazda"],
+  Suzuki: models["Suzuki"],
+  Audi: models["Audi"],
+  Citroen: models["Citroen"],
+  Alfa_romeo: models["Alfa_Romeo"],
+
 };
 
 export default function CarSearch() {
@@ -186,42 +221,63 @@ export default function CarSearch() {
   const [showYearModal, setShowYearModal] = useState(false);
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
-  const [searchResults, setSearchResults] = useState<Vehicle[]>([]);
+  const [searchResults, setSearchResults] = useState<VehicleList[]>([]);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
   console.log("selectedVehicles: ", selectedVehicles);
   
-  const handleSearch = async (e: React.FormEvent) => {
+  // const handleSearch = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+  //   formData.append("marca", selectedBrand);
+  //   formData.append("modelo", selectedModel);
+  //   formData.append("añoDesde", yearRange.from.toString());
+  //   formData.append("añoHasta", yearRange.to.toString());
+  //   formData.append("precioDesde", priceRange.from.toString());
+  //   formData.append("precioHasta", priceRange.to.toString());
+
+  //   console.log(
+  //     yearRange.from,
+  //     yearRange.to,
+  //     priceRange.from,
+  //     priceRange.to,
+  //     selectedBrand
+  //   );
+
+  //   try {
+  //     const response = await fetch(
+  //       `https://72jdmlb6-3000.brs.devtunnels.ms/cars?minPrice=${priceRange.from}&maxPrice=${priceRange.to}&marca=${selectedBrand}&startYear=${yearRange.from}&endYear=${yearRange.to}&modelo=${selectedModel}`,
+  //       {
+  //         method: "GET",
+  //       }
+  //     );
+  //     const data = await response.json();
+  //     setSearchResults(data);
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.error("Error al buscar vehículos:", error);
+  //   }
+  // };
+
+  const handleSetAlert = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("marca", selectedBrand);
-    formData.append("modelo", selectedModel);
-    formData.append("añoDesde", yearRange.from.toString());
-    formData.append("añoHasta", yearRange.to.toString());
-    formData.append("precioDesde", priceRange.from.toString());
-    formData.append("precioHasta", priceRange.to.toString());
-
-    console.log(
-      yearRange.from,
-      yearRange.to,
-      priceRange.from,
-      priceRange.to,
-      selectedBrand
-    );
-
-    try {
-      const response = await fetch(
-        `https://72jdmlb6-3000.brs.devtunnels.ms/cars?minPrice=${priceRange.from}&maxPrice=${priceRange.to}&marca=${selectedBrand}&startYear=${yearRange.from}&endYear=${yearRange.to}&modelo=${selectedModel}`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await response.json();
-      setSearchResults(data);
-      console.log(data);
-    } catch (error) {
-      console.error("Error al buscar vehículos:", error);
+    if(!selectedBrand) {
+toast.error("Por favor, selecciona una marca");      
+      return;
     }
-  };
+    if(!selectedModel) {  
+      toast.error("Por favor, selecciona un modelo");
+      return;
+    }
+    if(!yearRange.from || !yearRange.to) {
+toast.error("Por favor, selecciona un rango de años");
+      return;
+    }
+    if(!priceRange.from || !priceRange.to) {
+      toast.error("Por favor, selecciona un rango de precios");
+      return;
+    }
+    setShowAlertModal(true)
+  }
 
   // Usar este effect para cuando se ejecute una alarma creada
 
@@ -236,7 +292,7 @@ export default function CarSearch() {
       console.log("selectedVehiclesData: ", selectedVehiclesData);
       
 
-      await fetch("https://72jdmlb6-3000.brs.devtunnels.ms/management/vehicles/save", {
+      await fetch(URL_PROD + "/management/vehicles/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -259,6 +315,7 @@ export default function CarSearch() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Toaster />
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-6 space-y-8">
           <div className="flex items-center justify-between">
@@ -266,12 +323,12 @@ export default function CarSearch() {
               Encuentra tu Vehículo Ideal
             </h2>
             <div className="flex gap-4">
-              <button
-                onClick={() => navigate("/management")}
+            <button
+                onClick={() => navigate('/vehicles')}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <ClipboardList className="w-5 h-5" />
-                Mi Gestión
+                <Car className="w-5 h-5" />
+                Mis Vehículos
               </button>
               <button
                 onClick={() => navigate("/alerts")}
@@ -280,13 +337,14 @@ export default function CarSearch() {
                 <ListFilter className="w-5 h-5" />
                 Mis Alertas
               </button>
-              <button
+              <LogoutButton />
+              {/* <button
                 onClick={() => setShowAlertModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 Crear Alerta
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -304,7 +362,7 @@ export default function CarSearch() {
             </div>
           )}
 
-          <form onSubmit={handleSearch} className="space-y-6">
+          <form  onSubmit={handleSetAlert} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -381,8 +439,8 @@ export default function CarSearch() {
               type="submit"
               className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <Search className="w-5 h-5" />
-              Buscar Vehículos
+              <Bell className="w-5 h-5" />
+              Crear Alerta
             </button>
           </form>
         </div>

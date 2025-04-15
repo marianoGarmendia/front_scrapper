@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
+import { Toaster } from 'react-hot-toast';
+import VehicleList from "../components/VehicleList";
+import {useCarsContext } from '../context/CarsContext';
+
 
 interface Vehicle {
   id: string;
@@ -12,6 +17,8 @@ interface Vehicle {
   listingUrl: string;
   isContacted: boolean;
   isFavorite: boolean;
+  comment?: string;
+    contactCel: string;
 }
 
 interface CarAlert {
@@ -31,14 +38,22 @@ interface CarAlert {
   description: string;
   isContacted: boolean;
   isFavorite: boolean;
+  comment?: string;
+    contactCel: string;
 }
+
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
+
 
 export default function AlertDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [carAlert, setCarAlert] = useState<CarAlert[] | null>(null);
+  const { setVehicles } = useCarsContext();
+  const [carAlert, setCarAlert] = useState<CarAlert[] >([]);
   const [error, setError] = useState<string | null>(null);
   const [isContacted, setIsContacted] = useState<boolean>(false);
+  const [comments, setComments] = useState<string>("");
+  const [contactCel, setContactCel] = useState<string>("");
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
     const [deleteVehicle, setDeleteVehicle] = useState<boolean>(false);
   
@@ -48,7 +63,7 @@ export default function AlertDetailPage() {
     const fetchAlertDetails = async () => {
       try {
         const response = await fetch(
-          `https://72jdmlb6-3000.brs.devtunnels.ms/alerts/get-alerts-cars/${id}`
+         URL_PROD +  `/alerts/get-alerts-cars/${id}?alertPage=${true}`
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -63,6 +78,7 @@ export default function AlertDetailPage() {
         console.log(data.cars);
 
         setCarAlert(data.cars.cars);
+        setVehicles((prev) => [...prev, {alertId:id , vehicles: data.cars.cars}]);
       } catch (error) {
         console.error("Error al obtener los detalles de la alerta:", error);
         setError(
@@ -162,8 +178,204 @@ export default function AlertDetailPage() {
     [vehicle.id]: {
       isContacted: vehicle.isContacted,
       isFavorite: vehicle.isFavorite,
+      comments: vehicle.comment,
+      isContactCel: vehicle.contactCel,
     },
   }), {});
+
+  const handleToggleContacted = async (vehicleId: string) => {
+    console.log("handleToggleContacted", vehicleId);
+    
+    try {
+      const vehicle = carAlert?.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+
+      const response = await fetch( URL_PROD + `/management/vehicles/update/${vehicleId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isContacted: !vehicle.isContacted,
+          isFavorite: vehicle.isFavorite,
+          alertId: id,
+        }),
+      });
+
+      if (!response.ok){ 
+        toast.error("Error al actualizar el estado de contacto");
+        throw new Error('Error al actualizar el estado del vehículo');
+      }
+      toast.success("Estado de contacto actualizado con éxito");
+      setCarAlert(prev =>
+        prev.map(v =>
+          v.id === vehicleId
+            ? { ...v, isContacted: !v.isContacted }
+            : v
+        )
+      );
+      setIsContacted(!isContacted);
+    } catch (error) {
+      console.error('Error al actualizar el estado de contacto:', error);
+    }
+  };
+
+  const handleToggleFavorite = async (vehicleId: string) => {
+    
+    try {
+      const vehicle = carAlert.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+
+      const response = await fetch(URL_PROD +  `/management/vehicles/update/${vehicleId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isFavorite: !vehicle.isFavorite,
+          isContacted: vehicle.isContacted,
+          alertId: id,
+        }),
+      });
+
+      if (!response.ok){ 
+        toast.error("Error al actualizar el estado de favorito");
+        throw new Error('Error al actualizar el estado del vehículo');
+      }
+      setCarAlert(prev =>
+        prev.map(v =>
+          v.id === vehicleId
+          ? { ...v, isFavorite: !v.isFavorite }
+          : v
+        )
+      );
+      setIsFavorite(!isFavorite);
+      toast.success("Estado de favorito actualizado con éxito");
+    } catch (error) {
+      console.error('Error al actualizar el estado de favorito:', error);
+    }
+  };
+
+
+  const handleComment = async (vehicleId: string, comments:string) => {
+    try {
+      const vehicle = carAlert.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+
+      const response = await fetch(URL_PROD + `/management/vehicles/update/${vehicleId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+         comment: comments,
+         alertId: id,
+        }),
+      });
+
+      if (!response.ok) {
+        toast.error("Error al actualizar el comentario");
+        throw new Error('Error al actualizar el estado del vehículo');
+      }
+      toast.success("Comentario actualizado con éxito");
+     setComments(comments)
+    } catch (error) {
+      console.error('Error al actualizar el estado de favorito:', error);
+    }
+  };
+
+  const handleContactCel = async (vehicleId: string, contactCel:string) : Promise<void>=> {
+    console.log("handleContactCel", vehicleId);
+    console.log("contactCel", contactCel);
+    
+    try {
+      const vehicle = carAlert.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+
+      const response = await fetch(URL_PROD + `/management/vehicles/update/${vehicleId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+         contactCel: contactCel,
+         alertId: id,
+        }),
+      });
+
+      if (!response.ok) {
+        toast.error("Error al actualizar el celular de contacto");
+     
+        throw new Error('Error al actualizar el estado del vehículo');
+      }
+      toast.success("Celular de contacto actualizado con éxito");
+     setContactCel(contactCel)
+     
+    } catch (error) {
+      console.error('Error al actualizar el estado de favorito:', error);
+    }
+  };
+
+// Verificar esta funcion todo 09-04 23:31
+  const handleDelete = async (vehicleId: string) => {
+    try {
+      const response = await fetch(URL_PROD + `/management/vehicles/delete/${vehicleId}?alertId=${id}`, {
+        method: 'DELETE',
+        
+      });
+
+      if (!response.ok){
+        toast.error("Error al eliminar el vehículo");
+       throw new Error('Error al eliminar el vehículo');
+      }
+      toast.success("Vehículo eliminado con éxito");
+      setCarAlert(prev => prev.filter(v => v.id !== vehicleId));
+      setDeleteVehicle(true);
+    } catch (error) {
+      toast.error("Error al eliminar el vehículo");
+
+      console.error('Error al eliminar el vehículo:', error);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <p className="text-center text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // const managementData = vehicles.reduce((acc, vehicle) => ({
+  //   ...acc,
+  //   [vehicle.id]: {
+  //     isContacted: vehicle.isContacted,
+  //     isFavorite: vehicle.isFavorite,
+  //   },
+  // }), {});
+
+  const handleCommentChange = (e:any) => {
+    setComments(e.target.value);
+  };
+
+
+
+const TestToast = () => {
+  const notify = () => toast('¡Notificación de prueba!');
+
+  return (
+    <div>
+      <button onClick={notify}></button>
+      <Toaster />
+    </div>
+  );
+};
+
+
 
 
   if (error) {
@@ -201,8 +413,12 @@ export default function AlertDetailPage() {
             <ArrowLeft className="w-5 h-5" />
             Volver a Mis Alertas
           </button>
+     <TestToast />
           <h1 className="text-2xl font-bold text-gray-900">{alert.name}</h1>
         </div>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        
+
 
         {/* <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -234,8 +450,28 @@ export default function AlertDetailPage() {
           </div>
         </div> */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {carAlert.length > 0 &&
+       
+           <div className="mt-8">
+           
+                    <VehicleList
+                      vehicles={carAlert}
+                      onToggleContacted={handleToggleContacted}
+                      onToggleFavorite={handleToggleFavorite}
+                      // onDelete={handleDelete}
+                      onComments={handleComment}
+                      comments={comments}
+                      showManagementButtons={true}
+                      onContactCel={handleContactCel}
+                      managementData={managementData}
+                      onCommentChange={handleCommentChange}
+                      onDeleted={handleDelete}
+
+
+                    />
+                 
+                  
+                  </div>
+          {/* {carAlert.length > 0 &&
             carAlert.map((vehicle) => (
               <div
                 key={vehicle.id}
@@ -257,7 +493,7 @@ export default function AlertDetailPage() {
                 />
                 <div className="p-6">
                   <p className="text-gray-600 mt-1">{vehicle.description}</p>
-                  
+
                   <p className="text-xl font-bold text-blue-600 mt-2">
                     {vehicle.price.toLocaleString()}
                   </p>
@@ -271,7 +507,7 @@ export default function AlertDetailPage() {
                   </a>
                 </div>
               </div>
-            ))}
+            ))} */}
         </div>
       </div>
     </div>

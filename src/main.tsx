@@ -1,10 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { CarProvider } from './context/CarsContext.tsx';
 import App from './App.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <CarProvider>
+      <App />
+    </CarProvider>
+  
   </StrictMode>
 );

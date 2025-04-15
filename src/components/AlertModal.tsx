@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { X, Bell } from 'lucide-react';
 
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
+
+
 interface AlertModalProps {
   searchParams: {
     brand: string;
@@ -36,7 +39,7 @@ export default function AlertModal({ searchParams, onClose }: AlertModalProps) {
       formData.append('precioHasta', searchParams.priceRange.to.toString());
       formData.append('fechaInicio', new Date().toISOString());
 
-      const response = await fetch('https://72jdmlb6-3000.brs.devtunnels.ms/alerts/schedule-alert', {
+      const response = await fetch(URL_PROD + '/alerts/schedule-alert', {
         method: 'POST',
         body: formData,
       });
@@ -114,23 +117,7 @@ export default function AlertModal({ searchParams, onClose }: AlertModalProps) {
             />
           </div>
 
-          {/* <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">Estado de la Alerta</label>
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              disabled={isSubmitting}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isActive ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isActive ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div> */}
+          
 
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
             <h4 className="font-medium text-gray-900">Criterios de Búsqueda</h4>
