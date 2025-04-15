@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 // import ManagementPage from './pages/ManagementPage';
 
+const URL_PROD = import.meta.env.VITE_URL_PROD; 
+console.log("URL_PROD", URL_PROD);
 
 function App() {
   return (

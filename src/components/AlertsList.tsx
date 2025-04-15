@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Bell, BellOff } from 'lucide-react';
 
 const URL_PROD = import.meta.env.VITE_URL_PROD; 
+console.log("URL_PROD", URL_PROD);
+
 
 
 interface Alert {
