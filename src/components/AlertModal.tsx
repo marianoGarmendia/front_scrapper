@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { X, Bell } from 'lucide-react';
+import toast from 'react-hot-toast';
+import {Toaster} from 'react-hot-toast';
+
 
 const URL_PROD = import.meta.env.VITE_API_URL; 
 
@@ -55,6 +58,7 @@ export default function AlertModal({ searchParams, onClose }: AlertModalProps) {
 
       const data = await response.json();
       console.log('Alerta creada:', data);
+      toast.success('Alerta creada con éxito!');
       onClose();
     } catch (error) {
       console.error('Error al crear la alerta:', error);
@@ -66,6 +70,7 @@ export default function AlertModal({ searchParams, onClose }: AlertModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <Toaster/>
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
