@@ -56,6 +56,7 @@ export default function AlertDetailPage() {
   const [contactCel, setContactCel] = useState<string>("");
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
     const [deleteVehicle, setDeleteVehicle] = useState<boolean>(false);
+    const [thereCars, setThereCars] = useState<boolean>(true);
   
   console.log(id);
 
@@ -76,9 +77,16 @@ export default function AlertDetailPage() {
         console.log("data fetchAlertDetails");
 
         console.log(data.cars);
-
-        setCarAlert(data.cars.cars);
-        setVehicles((prev) => [...prev, {alertId:id , vehicles: data.cars.cars}]);
+        if(!data.cars.cars){
+          setThereCars(false);
+          return;
+        }else{
+       
+          
+          setCarAlert(data.cars.cars);
+          setVehicles((prev) => [...prev, {alertId:id , vehicles: data.cars.cars}]);
+        }
+        
       } catch (error) {
         console.error("Error al obtener los detalles de la alerta:", error);
         setError(
@@ -450,7 +458,8 @@ const TestToast = () => {
           </div>
         </div> */}
 
-       
+       {
+        thereCars && 
            <div className="mt-8">
            
                     <VehicleList
@@ -471,6 +480,7 @@ const TestToast = () => {
                  
                   
                   </div>
+       }
           {/* {carAlert.length > 0 &&
             carAlert.map((vehicle) => (
               <div
