@@ -279,9 +279,14 @@ toast.error("Por favor, selecciona un rango de años");
     setShowAlertModal(true)
   }
 
-  // Usar este effect para cuando se ejecute una alarma creada
+  // Usar este effect para cuando inice la app chequear endpoint de la api
 
-  useEffect(() => {})
+  useEffect(() => {
+    fetch("https://apiscrapper-production.up.railway.app/test")
+  .then(res => res.json())
+  .then(data => console.log("respuesta:", data))
+  .catch(err => console.error("error:", err));
+  },[])
 
   const handleSaveSelection = async () => {
     try {
