@@ -97,7 +97,7 @@ export default function AlertsPage() {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
-
+  const [thereCars, setThereCars] = useState(true);
 
   const [newCars, setNewCars] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -122,10 +122,16 @@ export default function AlertsPage() {
       console.log("data fetchAlertDetails");
 
       console.log(data.cars);
+      if(!data.cars.cars){
+        setThereCars(false);
+        return;
+      }else{
+        const cars = data.cars.cars;
+        const onlyNewCars = cars.filter((car: any) => car.nuevo === true);
+        setThereCars(true)
+        setNewCars(onlyNewCars);
 
-      const cars = data.cars.cars;
-      const onlyNewCars = cars.filter((car: any) => car.nuevo === true);
-      setNewCars(onlyNewCars);
+      }
     } catch (error) {
       console.error("Error al obtener los detalles de la alerta:", error);
       setError(
@@ -297,7 +303,7 @@ export default function AlertsPage() {
 
           {/* Detalles de la Alerta y Vehículos */}
           <div className="lg:col-span-2">
-            {selectedAlert && newCars ? (
+            {selectedAlert && thereCars ? (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
