@@ -19,7 +19,7 @@ import VehicleList from "./VehicleList";
 import LogoutButton from './LogoutButton';
 import * as models from "../utils/models.ts";
 
-const URL_PROD = import.meta.env.VITE_URL_PROD; 
+const URL_PROD = import.meta.env.VITE_API_URL; 
 
 export const carBrands = [
   { id: 1, name: "Chevrolet" },

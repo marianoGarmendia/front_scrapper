@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Bell } from 'lucide-react';
 
-const URL_PROD = import.meta.env.VITE_URL_PROD; 
+const URL_PROD = import.meta.env.VITE_API_URL; 
 
 
 interface AlertModalProps {

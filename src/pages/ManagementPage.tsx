@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import VehicleList from '../components/VehicleList';
 
-const URL_PROD = import.meta.env.VITE_URL_PROD; 
+const URL_PROD = import.meta.env.VITE_API_URL; 
 
 
 interface Vehicle {

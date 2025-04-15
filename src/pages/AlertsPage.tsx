@@ -47,7 +47,7 @@ interface Alert {
   }>;
 }
 
-const URL_PROD = import.meta.env.VITE_URL_PROD;
+const URL_PROD = import.meta.env.VITE_API_URL;
 
 function DeleteConfirmationModal({
   alertName,
