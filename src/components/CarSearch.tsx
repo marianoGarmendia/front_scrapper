@@ -377,6 +377,8 @@ toast.error("Por favor, selecciona un rango de años");
                   value={selectedBrand}
                   onChange={(e) => {
                     setSelectedBrand(e.target.value);
+                    console.log("selectedBrand: ", e.target.value);
+                    
                     setSelectedModel("");
                   }}
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -396,7 +398,11 @@ toast.error("Por favor, selecciona un rango de años");
                 </label>
                 <select
                   value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedModel(e.target.value)
+                    console.log("selectedModel: ", e.target.value);
+                    
+                  }}
                   disabled={!selectedBrand}
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 >
