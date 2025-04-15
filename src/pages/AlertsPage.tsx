@@ -172,6 +172,8 @@ export default function AlertsPage() {
   useEffect(() => {
     console.log("selectedAlert", selectedAlert);
     if (!selectedAlert) return;
+    console.log("selectedAlert.id", selectedAlert.id);
+    
     fetchAlertDetails(selectedAlert?.id);
   }, [selectedAlert]);
 
