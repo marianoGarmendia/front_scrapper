@@ -122,7 +122,7 @@ export default function AlertsPage() {
       console.log("data fetchAlertDetails");
 
       console.log(data.cars);
-      if(!data.cars.cars){
+      if(!data.cars || data.cars.cars.length === 0){
         setThereCars(false);
         return;
       }else{
