@@ -98,6 +98,7 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
+
   const [newCars, setNewCars] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
@@ -263,6 +264,13 @@ export default function AlertsPage() {
                       ) : (
                         <BellOff className="w-5 h-5 text-gray-400" />
                       )}
+                      <button
+                      onClick={() => handleDeleteClick(alert)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                      title="Eliminar Alerta"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                       <div>
                         <h4 className="font-medium text-gray-900">
                           {alert.nombreAlerta}
@@ -289,7 +297,7 @@ export default function AlertsPage() {
 
           {/* Detalles de la Alerta y Vehículos */}
           <div className="lg:col-span-2">
-            {selectedAlert ? (
+            {selectedAlert && newCars ? (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
