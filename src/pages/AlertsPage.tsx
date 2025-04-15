@@ -136,7 +136,7 @@ export default function AlertsPage() {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch(`${URL_PROD}alerts/get-alerts`);
+        const response = await fetch(`${URL_PROD}/alerts/get-alerts`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -184,7 +184,7 @@ export default function AlertsPage() {
     if (!alertToDelete) return;
     try {
       const response = await fetch(
-        `${URL_PROD}alerts/delete-alert/${alertToDelete.id}`,
+        `${URL_PROD}/alerts/delete-alert/${alertToDelete.id}`,
         {
           method: "DELETE",
           headers: {

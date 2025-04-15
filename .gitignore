@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+static.json
 .env
 .bolt
 # Editor directories and files
